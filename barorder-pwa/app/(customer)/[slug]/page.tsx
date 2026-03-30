@@ -1,3 +1,5 @@
+import { ErrorState } from "@/components/customer/ErrorState";
+import { GeolocationGuard } from "@/components/customer/GeolocationGuard";
 import { MenuCatalog } from "@/components/menu/MenuCatalog";
 import { getAvailableMenuItems, getBarBySlug } from "@/lib/customer-api";
 
@@ -9,21 +11,37 @@ type CustomerMenuPageProps = {
 
 export default async function CustomerMenuPage({ params }: CustomerMenuPageProps) {
   const { slug } = await params;
-  const bar = await getBarBySlug(slug);
+  let bar: Awaited<ReturnType<typeof getBarBySlug>>;
+  let menuItems: Awaited<ReturnType<typeof getAvailableMenuItems>>;
+  let fetchFailed = false;
+  let barMissing = false;
 
-  if (!bar) {
-    return (
-      <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-start justify-center gap-3 px-6">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Customer app</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Baaria ei loytynyt</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Tarkista URL-slug ja yrita uudelleen.
-        </p>
-      </main>
-    );
+  try {
+    bar = await getBarBySlug(slug);
+    if (!bar) {
+      barMissing = true;
+      menuItems = [];
+    } else {
+      menuItems = await getAvailableMenuItems(bar.id);
+    }
+  } catch {
+    fetchFailed = true;
+    bar = null;
+    menuItems = [];
   }
 
-  const menuItems = await getAvailableMenuItems(bar.id);
+  if (barMissing) {
+    return <ErrorState title="Baaria ei loytynyt" description="Tarkista URL-slug ja yrita uudelleen." />;
+  }
+
+  if (fetchFailed || !bar) {
+    return (
+      <ErrorState
+        title="Tietojen haku epaonnistui"
+        description="Yhteys palveluun katkesi. Paivita sivu ja yrita uudelleen."
+      />
+    );
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-start justify-center gap-3 px-6">
@@ -36,7 +54,9 @@ export default async function CustomerMenuPage({ params }: CustomerMenuPageProps
           <p className="text-sm text-zinc-600 dark:text-zinc-400">Menussa ei ole tuotteita.</p>
         </section>
       ) : (
-        <MenuCatalog barId={bar.id} items={menuItems} />
+        <GeolocationGuard barLat={bar.locationLat} barLong={bar.locationLong}>
+          <MenuCatalog barId={bar.id} items={menuItems} />
+        </GeolocationGuard>
       )}
     </main>
   );
