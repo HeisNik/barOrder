@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { DEFAULT_ORDER_STATUS } from "@/lib/constants/order-status";
 import { supabase } from "@/lib/supabase";
 import type { CheckoutLineItemInput, CheckoutRequest } from "@/types";
 
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
       bar_id: payload.barId,
       items: orderItemsPayload,
       total_amount: totalAmount,
-      status: "paid",
+      status: DEFAULT_ORDER_STATUS,
       pickup_code: pickupCode,
     })
     .select("id")
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
 
   const checkoutUrl = `/success?checkout=mock&order=${insertedOrder.id}&pickup=${encodeURIComponent(
     pickupCode,
-  )}&status=paid&amount=${totalAmount}`;
+  )}&status=${DEFAULT_ORDER_STATUS}&amount=${totalAmount}`;
 
   return NextResponse.json({ checkoutUrl });
 }

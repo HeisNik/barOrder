@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { isOrderStatus } from "@/lib/constants/order-status";
 import { supabase } from "@/lib/supabase";
 import type { OrderStatus } from "@/types";
 
@@ -44,13 +45,7 @@ export function useRealtimeOrders({
         },
         (payload) => {
           const nextStatus = payload.new?.status;
-          if (
-            nextStatus === "pending" ||
-            nextStatus === "paid" ||
-            nextStatus === "preparing" ||
-            nextStatus === "ready" ||
-            nextStatus === "delivered"
-          ) {
+          if (isOrderStatus(nextStatus)) {
             setStatus(nextStatus);
           }
         },

@@ -1,4 +1,5 @@
 import { PickupCodeView } from "@/components/customer/PickupCodeView";
+import { DEFAULT_ORDER_STATUS, isOrderStatus } from "@/lib/constants/order-status";
 import type { OrderStatus } from "@/types";
 
 type SuccessPageProps = {
@@ -11,11 +12,11 @@ type SuccessPageProps = {
 };
 
 function toOrderStatus(status?: string): OrderStatus {
-  if (status === "pending" || status === "paid" || status === "preparing" || status === "ready" || status === "delivered") {
+  if (isOrderStatus(status)) {
     return status;
   }
 
-  return "paid";
+  return DEFAULT_ORDER_STATUS;
 }
 
 function toPickupCode(raw?: string): string {

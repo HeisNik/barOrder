@@ -1,12 +1,4 @@
-export const ORDER_STATUSES = [
-  "pending",
-  "paid",
-  "preparing",
-  "ready",
-  "delivered",
-] as const;
-
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
+import type { OrderStatus } from "@/lib/constants/order-status";
 
 export type OrderItem = {
   menuItemId: string;
