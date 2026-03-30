@@ -4,6 +4,7 @@ import type { OrderStatus } from "@/types";
 type SuccessPageProps = {
   searchParams: Promise<{
     amount?: string;
+    order?: string;
     pickup?: string;
     status?: string;
   }>;
@@ -30,6 +31,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const query = await searchParams;
   const status = toOrderStatus(query.status);
   const pickupCode = toPickupCode(query.pickup);
+  const orderId = query.order ?? null;
   const totalAmountCents = query.amount ? Number(query.amount) : null;
 
   return (
@@ -39,7 +41,12 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Tallenna noutokoodi ja nayta se tiskilla juomia noutaessa.
       </p>
-      <PickupCodeView pickupCode={pickupCode} status={status} totalAmountCents={totalAmountCents} />
+      <PickupCodeView
+        pickupCode={pickupCode}
+        initialStatus={status}
+        orderId={orderId}
+        totalAmountCents={totalAmountCents}
+      />
     </main>
   );
 }

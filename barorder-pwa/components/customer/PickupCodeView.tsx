@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
 import type { OrderStatus } from "@/types";
 
 type PickupCodeViewProps = {
   pickupCode: string;
-  status: OrderStatus;
+  initialStatus: OrderStatus;
+  orderId?: string | null;
   totalAmountCents?: number | null;
 };
 
@@ -22,8 +24,17 @@ function formatPrice(cents: number): string {
   return `${(cents / 100).toFixed(2)} EUR`;
 }
 
-export function PickupCodeView({ pickupCode, status, totalAmountCents }: PickupCodeViewProps) {
+export function PickupCodeView({
+  pickupCode,
+  initialStatus,
+  orderId = null,
+  totalAmountCents,
+}: PickupCodeViewProps) {
   const [timestamp, setTimestamp] = useState(() => new Date());
+  const { status, isRealtimeConnected } = useRealtimeOrders({
+    orderId,
+    initialStatus,
+  });
 
   useEffect(() => {
     const id = window.setInterval(() => setTimestamp(new Date()), 1000);
@@ -35,7 +46,12 @@ export function PickupCodeView({ pickupCode, status, totalAmountCents }: PickupC
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Tilausstatus</p>
         <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3 py-1 text-sm dark:border-zinc-700">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+          <span
+            className={[
+              "h-2 w-2 rounded-full",
+              isRealtimeConnected ? "animate-pulse bg-emerald-500" : "bg-zinc-400",
+            ].join(" ")}
+          />
           {STATUS_LABELS[status]}
         </span>
       </div>
@@ -49,6 +65,11 @@ export function PickupCodeView({ pickupCode, status, totalAmountCents }: PickupC
         <span>{timestamp.toLocaleTimeString("fi-FI")}</span>
         {typeof totalAmountCents === "number" ? <span>Maksettu: {formatPrice(totalAmountCents)}</span> : null}
       </div>
+      {!isRealtimeConnected ? (
+        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Reaaliaikainen seuranta ei ole viela yhdistetty.
+        </p>
+      ) : null}
     </section>
   );
 }

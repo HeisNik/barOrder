@@ -7,7 +7,17 @@ type MenuPriceRow = {
   id: string;
   price: number;
   is_available: boolean;
+  name: string;
 };
+
+type InsertedOrderRow = {
+  id: string;
+};
+
+function generatePickupCode(): string {
+  const code = Math.floor(100 + Math.random() * 900);
+  return `#${code}`;
+}
 
 function isValidLineItem(input: unknown): input is CheckoutLineItemInput {
   if (!input || typeof input !== "object") {
@@ -54,7 +64,7 @@ export async function POST(request: Request) {
   const menuItemIds = payload.items.map((item) => item.menuItemId);
   const { data: menuRows, error: menuError } = await supabase
     .from("menu_items")
-    .select("id, price, is_available")
+    .select("id, name, price, is_available")
     .eq("bar_id", payload.barId)
     .in("id", menuItemIds)
     .returns<MenuPriceRow[]>();
@@ -65,6 +75,12 @@ export async function POST(request: Request) {
 
   const priceByItemId = new Map((menuRows ?? []).map((row) => [row.id, row]));
   let totalAmount = 0;
+  const orderItemsPayload: Array<{
+    id: string;
+    name: string;
+    price: number;
+    qty: number;
+  }> = [];
 
   for (const item of payload.items) {
     const menuRow = priceByItemId.get(item.menuItemId);
@@ -76,10 +92,34 @@ export async function POST(request: Request) {
     }
 
     totalAmount += menuRow.price * item.quantity;
+    orderItemsPayload.push({
+      id: menuRow.id,
+      name: menuRow.name,
+      price: menuRow.price,
+      qty: item.quantity,
+    });
   }
 
-  // Placeholder for Stripe redirect in part 7.
-  const checkoutUrl = `/success?checkout=mock&amount=${totalAmount}`;
+  const pickupCode = generatePickupCode();
+  const { data: insertedOrder, error: insertError } = await supabase
+    .from("orders")
+    .insert({
+      bar_id: payload.barId,
+      items: orderItemsPayload,
+      total_amount: totalAmount,
+      status: "paid",
+      pickup_code: pickupCode,
+    })
+    .select("id")
+    .single<InsertedOrderRow>();
+
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
+  }
+
+  const checkoutUrl = `/success?checkout=mock&order=${insertedOrder.id}&pickup=${encodeURIComponent(
+    pickupCode,
+  )}&status=paid&amount=${totalAmount}`;
 
   return NextResponse.json({ checkoutUrl });
 }
