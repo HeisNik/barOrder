@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
+import { ORDER_STATUS_LABELS_FI } from "@/lib/constants/order-status";
 import type { OrderStatus } from "@/types";
 
 type PickupCodeViewProps = {
@@ -10,14 +11,6 @@ type PickupCodeViewProps = {
   initialStatus: OrderStatus;
   orderId?: string | null;
   totalAmountCents?: number | null;
-};
-
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Odottaa maksuvahvistusta",
-  paid: "Maksettu",
-  preparing: "Valmistuksessa",
-  ready: "Valmis noudettavaksi",
-  delivered: "Luovutettu",
 };
 
 function formatPrice(cents: number): string {
@@ -52,7 +45,7 @@ export function PickupCodeView({
               isRealtimeConnected ? "animate-pulse bg-emerald-500" : "bg-zinc-400",
             ].join(" ")}
           />
-          {STATUS_LABELS[status]}
+          {ORDER_STATUS_LABELS_FI[status]}
         </span>
       </div>
 
