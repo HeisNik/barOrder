@@ -36,7 +36,7 @@ export default async function CustomerMenuPage({ params }: CustomerMenuPageProps
           <p className="text-sm text-zinc-600 dark:text-zinc-400">Menussa ei ole tuotteita.</p>
         </section>
       ) : (
-        <MenuCatalog items={menuItems} />
+        <MenuCatalog barId={bar.id} items={menuItems} />
       )}
     </main>
   );

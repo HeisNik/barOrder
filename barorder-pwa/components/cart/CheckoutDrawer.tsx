@@ -6,11 +6,14 @@ type CheckoutDrawerProps = {
   isOpen: boolean;
   items: CartItem[];
   subtotal: number;
+  isCheckingOut: boolean;
+  checkoutError: string | null;
   onClose: () => void;
   onIncrement: (menuItemId: string) => void;
   onDecrement: (menuItemId: string) => void;
   onRemove: (menuItemId: string) => void;
   onClear: () => void;
+  onCheckout: () => void;
 };
 
 function formatPrice(cents: number): string {
@@ -21,11 +24,14 @@ export function CheckoutDrawer({
   isOpen,
   items,
   subtotal,
+  isCheckingOut,
+  checkoutError,
   onClose,
   onIncrement,
   onDecrement,
   onRemove,
   onClear,
+  onCheckout,
 }: CheckoutDrawerProps) {
   if (!isOpen) {
     return null;
@@ -103,20 +109,25 @@ export function CheckoutDrawer({
               <span>Valisumma</span>
               <span className="font-semibold">{formatPrice(subtotal)}</span>
             </div>
+            {checkoutError ? (
+              <p className="mb-3 text-sm text-red-600 dark:text-red-400">{checkoutError}</p>
+            ) : null}
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClear}
-                className="rounded-full border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
+                disabled={isCheckingOut}
+                className="rounded-full border border-zinc-300 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700"
               >
                 Tyhjenna kori
               </button>
               <button
                 type="button"
-                disabled={items.length === 0}
+                onClick={onCheckout}
+                disabled={items.length === 0 || isCheckingOut}
                 className="flex-1 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
               >
-                Maksa (seuraavassa osassa)
+                {isCheckingOut ? "Siirretaan maksuun..." : "Maksa"}
               </button>
             </div>
           </div>
