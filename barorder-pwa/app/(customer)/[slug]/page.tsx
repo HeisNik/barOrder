@@ -1,3 +1,4 @@
+import { MenuCatalog } from "@/components/menu/MenuCatalog";
 import { getAvailableMenuItems, getBarBySlug } from "@/lib/customer-api";
 
 type CustomerMenuPageProps = {
@@ -29,21 +30,14 @@ export default async function CustomerMenuPage({ params }: CustomerMenuPageProps
       <p className="text-sm text-zinc-500 dark:text-zinc-400">Customer app</p>
       <h1 className="text-3xl font-semibold tracking-tight">Baari: {bar.name}</h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">Slug: {slug}</p>
-      <section className="mt-4 w-full rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="mb-2 text-lg font-medium">Saatavilla olevat tuotteet</h2>
-        {menuItems.length === 0 ? (
+      {menuItems.length === 0 ? (
+        <section className="mt-4 w-full rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+          <h2 className="mb-2 text-lg font-medium">Saatavilla olevat tuotteet</h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">Menussa ei ole tuotteita.</p>
-        ) : (
-          <ul className="space-y-1">
-            {menuItems.map((item) => (
-              <li key={item.id} className="flex items-center justify-between text-sm">
-                <span>{item.name}</span>
-                <span className="font-medium">{(item.price / 100).toFixed(2)} EUR</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        </section>
+      ) : (
+        <MenuCatalog items={menuItems} />
+      )}
     </main>
   );
 }
