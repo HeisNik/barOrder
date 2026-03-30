@@ -10,6 +10,10 @@ export async function getBarBySlug(slug: string): Promise<Bar | null> {
     .eq("is_active", true)
     .maybeSingle<DbBarRow>();
 
+  console.log("[getBarBySlug] slug:", slug);
+  console.log("[getBarBySlug] data:", data);
+  console.log("[getBarBySlug] error:", error);
+
   if (error) {
     throw new Error(`Failed to fetch bar by slug: ${error.message}`);
   }

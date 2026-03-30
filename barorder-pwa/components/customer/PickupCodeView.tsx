@@ -55,7 +55,7 @@ export function PickupCodeView({
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
-        <span>{timestamp.toLocaleTimeString("fi-FI")}</span>
+        <span suppressHydrationWarning>{timestamp.toLocaleTimeString("fi-FI")}</span>
         {typeof totalAmountCents === "number" ? <span>Maksettu: {formatPrice(totalAmountCents)}</span> : null}
       </div>
       {!isRealtimeConnected ? (
