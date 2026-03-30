@@ -1,0 +1,38 @@
+-- 1. Luodaan taulut
+CREATE TABLE bars (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text UNIQUE NOT NULL,
+  name text NOT NULL,
+  location_lat float,
+  location_long float,
+  stripe_account_id text,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE menu_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  bar_id uuid REFERENCES bars(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  description text,
+  price int NOT NULL, -- sentteinä
+  category text,
+  is_available boolean DEFAULT true
+);
+
+CREATE TABLE orders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  bar_id uuid REFERENCES bars(id),
+  table_number text,
+  items jsonb,
+  total_amount int,
+  status text DEFAULT 'pending', -- pending, paid, ready, delivered
+  pickup_code text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- 2. Aktioidaan Realtime orders-taululle
+alter publication supabase_realtime add table orders;
+
+-- 3. Esimerkkidata (Demoa varten)
+INSERT INTO bars (name, slug) VALUES ('Demo Baari', 'demo');
