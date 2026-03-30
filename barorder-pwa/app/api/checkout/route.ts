@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { DEFAULT_ORDER_STATUS } from "@/lib/constants/order-status";
 import { supabase } from "@/lib/supabase";
-import type { CheckoutLineItemInput, CheckoutRequest } from "@/types";
+import { isValidCheckoutRequest } from "@/lib/validators/checkout";
 
 type MenuPriceRow = {
   id: string;
@@ -18,35 +18,6 @@ type InsertedOrderRow = {
 function generatePickupCode(): string {
   const code = Math.floor(100 + Math.random() * 900);
   return `#${code}`;
-}
-
-function isValidLineItem(input: unknown): input is CheckoutLineItemInput {
-  if (!input || typeof input !== "object") {
-    return false;
-  }
-
-  const maybeLineItem = input as CheckoutLineItemInput;
-  return (
-    typeof maybeLineItem.menuItemId === "string" &&
-    maybeLineItem.menuItemId.length > 0 &&
-    Number.isInteger(maybeLineItem.quantity) &&
-    maybeLineItem.quantity > 0
-  );
-}
-
-function isValidCheckoutRequest(input: unknown): input is CheckoutRequest {
-  if (!input || typeof input !== "object") {
-    return false;
-  }
-
-  const maybeRequest = input as CheckoutRequest;
-  return (
-    typeof maybeRequest.barId === "string" &&
-    maybeRequest.barId.length > 0 &&
-    Array.isArray(maybeRequest.items) &&
-    maybeRequest.items.length > 0 &&
-    maybeRequest.items.every(isValidLineItem)
-  );
 }
 
 export async function POST(request: Request) {

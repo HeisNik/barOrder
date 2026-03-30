@@ -1,6 +1,10 @@
 import { PickupCodeView } from "@/components/customer/PickupCodeView";
-import { DEFAULT_ORDER_STATUS, isOrderStatus } from "@/lib/constants/order-status";
-import type { OrderStatus } from "@/types";
+import {
+  parseAmountCentsParam,
+  parseOrderIdParam,
+  parseOrderStatusParam,
+  parsePickupCodeParam,
+} from "@/lib/params";
 
 type SuccessPageProps = {
   searchParams: Promise<{
@@ -11,29 +15,12 @@ type SuccessPageProps = {
   }>;
 };
 
-function toOrderStatus(status?: string): OrderStatus {
-  if (isOrderStatus(status)) {
-    return status;
-  }
-
-  return DEFAULT_ORDER_STATUS;
-}
-
-function toPickupCode(raw?: string): string {
-  if (raw && raw.trim().length > 0) {
-    return raw.startsWith("#") ? raw : `#${raw}`;
-  }
-
-  const fallback = Math.floor(100 + Math.random() * 900);
-  return `#${fallback}`;
-}
-
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const query = await searchParams;
-  const status = toOrderStatus(query.status);
-  const pickupCode = toPickupCode(query.pickup);
-  const orderId = query.order ?? null;
-  const totalAmountCents = query.amount ? Number(query.amount) : null;
+  const status = parseOrderStatusParam(query.status);
+  const pickupCode = parsePickupCodeParam(query.pickup);
+  const orderId = parseOrderIdParam(query.order);
+  const totalAmountCents = parseAmountCentsParam(query.amount);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-start justify-center gap-3 px-6 py-10">

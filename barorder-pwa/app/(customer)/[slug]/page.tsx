@@ -2,6 +2,7 @@ import { ErrorState } from "@/components/customer/ErrorState";
 import { GeolocationGuard } from "@/components/customer/GeolocationGuard";
 import { MenuCatalog } from "@/components/menu/MenuCatalog";
 import { getAvailableMenuItems, getBarBySlug } from "@/lib/customer-api";
+import { parseSlug } from "@/lib/params";
 
 type CustomerMenuPageProps = {
   params: Promise<{
@@ -10,7 +11,13 @@ type CustomerMenuPageProps = {
 };
 
 export default async function CustomerMenuPage({ params }: CustomerMenuPageProps) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = parseSlug(rawSlug);
+
+  if (!slug) {
+    return <ErrorState title="Virheellinen osoite" description="URL-slug on virheellinen." />;
+  }
+
   let bar: Awaited<ReturnType<typeof getBarBySlug>>;
   let menuItems: Awaited<ReturnType<typeof getAvailableMenuItems>>;
   let fetchFailed = false;
