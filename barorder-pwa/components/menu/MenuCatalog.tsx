@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from "react";
 
+import { CartStickyBar } from "@/components/cart/CartStickyBar";
+import { CheckoutDrawer } from "@/components/cart/CheckoutDrawer";
 import { MenuCard } from "@/components/menu/MenuCard";
 import { MenuCategory } from "@/components/menu/MenuCategory";
+import { useCart } from "@/hooks/useCart";
 import type { MenuCategory as MenuCategoryType, MenuItem } from "@/types";
 
 type MenuCatalogProps = {
@@ -12,6 +15,18 @@ type MenuCatalogProps = {
 
 export function MenuCatalog({ items }: MenuCatalogProps) {
   const [activeCategory, setActiveCategory] = useState<MenuCategoryType | "all">("all");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const {
+    items: cartItems,
+    itemCount,
+    subtotal,
+    addItem,
+    removeItem,
+    incrementItem,
+    decrementItem,
+    clearCart,
+    getItemQuantity,
+  } = useCart();
 
   const categories = useMemo(
     () => Array.from(new Set(items.map((item) => item.category))),
@@ -27,7 +42,7 @@ export function MenuCatalog({ items }: MenuCatalogProps) {
   }, [activeCategory, items]);
 
   return (
-    <section className="mt-4 w-full space-y-4">
+    <section className="mt-4 w-full space-y-4 pb-24">
       <MenuCategory
         categories={categories}
         activeCategory={activeCategory}
@@ -40,10 +55,26 @@ export function MenuCatalog({ items }: MenuCatalogProps) {
       ) : (
         <div className="space-y-3">
           {filteredItems.map((item) => (
-            <MenuCard key={item.id} item={item} />
+            <MenuCard
+              key={item.id}
+              item={item}
+              quantityInCart={getItemQuantity(item.id)}
+              onAddToCart={addItem}
+            />
           ))}
         </div>
       )}
+      <CartStickyBar itemCount={itemCount} subtotal={subtotal} onOpen={() => setIsDrawerOpen(true)} />
+      <CheckoutDrawer
+        isOpen={isDrawerOpen}
+        items={cartItems}
+        subtotal={subtotal}
+        onClose={() => setIsDrawerOpen(false)}
+        onIncrement={incrementItem}
+        onDecrement={decrementItem}
+        onRemove={removeItem}
+        onClear={clearCart}
+      />
     </section>
   );
 }

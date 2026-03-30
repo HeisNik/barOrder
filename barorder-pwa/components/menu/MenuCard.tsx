@@ -2,13 +2,15 @@ import type { MenuItem } from "@/types";
 
 type MenuCardProps = {
   item: MenuItem;
+  quantityInCart: number;
+  onAddToCart: (item: MenuItem) => void;
 };
 
 function formatPrice(cents: number): string {
   return `${(cents / 100).toFixed(2)} EUR`;
 }
 
-export function MenuCard({ item }: MenuCardProps) {
+export function MenuCard({ item, quantityInCart, onAddToCart }: MenuCardProps) {
   return (
     <article className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
       <div className="flex items-start justify-between gap-4">
@@ -22,9 +24,10 @@ export function MenuCard({ item }: MenuCardProps) {
       </div>
       <button
         type="button"
+        onClick={() => onAddToCart(item)}
         className="mt-4 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 dark:bg-zinc-100 dark:text-zinc-900"
       >
-        Lisaa koriin
+        Lisaa koriin{quantityInCart > 0 ? ` (${quantityInCart})` : ""}
       </button>
     </article>
   );
